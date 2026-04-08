@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 # ── Configuración de la página ───────────────────────────────────
 st.set_page_config(
     page_title="Vigiax",
-    page_icon="🌙",
+    page_icon=None,
     layout="centered"
 )
 
@@ -23,7 +23,7 @@ def cargar_modelo():
 model, scaler, encoder, features = cargar_modelo()
 
 # ── Header ───────────────────────────────────────────────────────
-st.title("🌙 Vigiax")
+st.title("Vigiax")
 st.subheader("Predicción de riesgo de trastorno del sueño")
 st.markdown("""
 Sistema de detección temprana basado en Machine Learning con datos reales
@@ -32,13 +32,13 @@ del **CDC-NHANES 2017-2020** (8,500+ adultos estadounidenses).
 st.divider()
 
 # ── Formulario ───────────────────────────────────────────────────
-st.markdown("### 📋 Ingresa los datos del paciente")
-st.info("💡 Los campos marcados con *(opcional)* pueden dejarse en blanco. Entre más datos brindes, más preciso será el resultado.")
+st.markdown("### Ingresa los datos del paciente")
+st.info("Los campos marcados con *(opcional)* pueden dejarse en blanco. Entre más datos brindes, más preciso será el resultado.")
 
 col1, col2 = st.columns(2)
 
 with col1:
-    st.markdown("#### 👤 Datos personales")
+    st.markdown("#### Datos personales")
 
     age = st.slider(
         "Edad (años)", 18, 80, 35,
@@ -65,7 +65,7 @@ with col1:
         help="Grupo étnico al que pertenece el paciente. Clasificación usada por el CDC en el estudio NHANES."
     )
 
-    st.markdown("#### ⚖️ Composición corporal")
+    st.markdown("#### Composición corporal")
 
     weight_kg = st.number_input(
         "Peso (kg)", 0.0, 260.0, 0.0, step=0.5,
@@ -103,7 +103,7 @@ with col1:
         )
 
 with col2:
-    st.markdown("#### 💓 Salud cardiovascular")
+    st.markdown("#### Salud cardiovascular")
 
     tiene_pulso = st.checkbox(
         "Conozco mi pulso en reposo *(opcional)*",
@@ -116,7 +116,7 @@ with col2:
             help="Latidos por minuto en reposo total, idealmente medido en la mañana antes de levantarse. Rango normal: 60–100 bpm. Atletas pueden tener 40–60 bpm."
         )
 
-    st.markdown("#### 😴 Hábitos de sueño")
+    st.markdown("#### Hábitos de sueño")
 
     sleep_weekday_hrs = st.slider(
         "Horas de sueño entre semana", 2.0, 14.0, 7.0, step=0.5,
@@ -139,13 +139,11 @@ with col2:
         help="Incluye dificultad para conciliar el sueño, despertarse durante la noche o sentirse sin descanso al despertar."
     )
 
-    st.markdown("#### 🏃 Actividad física")
-    st.caption("Actividad **vigorosa**: causa aumento grande en respiración y ritmo cardíaco. Ejemplos: correr, fútbol, ciclismo intenso, natación rápida, aeróbicos intensos.")
-    st.caption("Actividad **moderada**: causa aumento leve en respiración y ritmo cardíaco. Ejemplos: caminar rápido, yoga, bailar, ciclismo suave, trabajo doméstico pesado.")
+    st.markdown("#### Actividad física")
 
     vigorous_work = st.radio(
         "¿Realiza actividad **vigorosa** en su trabajo o labores?", [1, 2],
-        format_func=lambda x: "✅ Sí" if x == 1 else "❌ No",
+        format_func=lambda x: "Sí" if x == 1 else "No",
         help="Incluye trabajos físicamente exigentes como construcción, carga de materiales pesados, agricultura intensa, etc."
     )
     if vigorous_work == 1:
@@ -158,13 +156,13 @@ with col2:
 
     moderate_work = st.radio(
         "¿Realiza actividad **moderada** en su trabajo o labores?", [1, 2],
-        format_func=lambda x: "✅ Sí" if x == 1 else "❌ No",
+        format_func=lambda x: "Sí" if x == 1 else "No",
         help="Incluye trabajos como enfermería, docencia activa, ventas con caminata, limpieza, etc."
     )
 
     vigorous_rec = st.radio(
         "¿Realiza actividad **vigorosa** en tiempo libre o recreación?", [1, 2],
-        format_func=lambda x: "✅ Sí" if x == 1 else "❌ No",
+        format_func=lambda x: "Sí" if x == 1 else "No",
         help="Incluye deportes recreativos, gym de alta intensidad, HIIT, crossfit, running, ciclismo de montaña, etc."
     )
     if vigorous_rec == 1:
@@ -191,12 +189,12 @@ st.markdown(f"**Datos opcionales completados: {completados}/{total}**")
 st.progress(completados / total)
 if completados < total:
     faltantes = [k for k, v in campos_opcionales.items() if not v]
-    st.caption(f"📌 Campos sin completar: {', '.join(faltantes)} — entre más datos brindes, más preciso será el resultado.")
+    st.caption(f"Campos sin completar: {', '.join(faltantes)} — entre más datos brindes, más preciso será el resultado.")
 else:
-    st.success("✅ Todos los datos completados — máxima precisión del modelo")
+    st.success("Todos los datos completados — máxima precisión del modelo")
 
 # ── Predicción ───────────────────────────────────────────────────
-if st.button("🔍 Analizar riesgo", use_container_width=True, type="primary"):
+if st.button("Analizar riesgo", use_container_width=True, type="primary"):
 
     MEDIANAS = {
         "weight_kg":     82.3,
