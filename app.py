@@ -38,68 +38,142 @@ st.info("💡 Los campos marcados con *(opcional)* pueden dejarse en blanco. Ent
 col1, col2 = st.columns(2)
 
 with col1:
-    age       = st.slider("Edad (años)", 18, 80, 35)
-    gender    = st.selectbox("Género", ["Male", "Female"])
-    ethnicity = st.selectbox("Etnia", [
-        "Non-Hispanic White", "Non-Hispanic Black", "Non-Hispanic Asian",
-        "Mexican American", "Other Hispanic", "Other/Multiracial"
-    ])
-    weight_kg = st.number_input("Peso (kg)", 0.0, 260.0, 0.0, step=0.5,
-                                 help="Dejar en 0 si no lo sabes")
-    height_cm = st.number_input("Altura (cm)", 0.0, 200.0, 0.0, step=0.5,
-                                 help="Dejar en 0 si no lo sabes")
+    st.markdown("#### 👤 Datos personales")
 
-    # BMI solo si tienen peso y altura
+    age = st.slider(
+        "Edad (años)", 18, 80, 35,
+        help="Tu edad actual en años cumplidos."
+    )
+    gender = st.selectbox(
+        "Género", ["Male", "Female"],
+        format_func=lambda x: "Masculino" if x == "Male" else "Femenino",
+        help="Género biológico del paciente."
+    )
+    ethnicity = st.selectbox(
+        "Etnia", [
+            "Non-Hispanic White", "Non-Hispanic Black", "Non-Hispanic Asian",
+            "Mexican American", "Other Hispanic", "Other/Multiracial"
+        ],
+        format_func=lambda x: {
+            "Non-Hispanic White":   "Blanco no hispano",
+            "Non-Hispanic Black":   "Negro no hispano",
+            "Non-Hispanic Asian":   "Asiático no hispano",
+            "Mexican American":     "Mexicano americano",
+            "Other Hispanic":       "Hispano otro",
+            "Other/Multiracial":    "Mixto / otra etnia"
+        }[x],
+        help="Grupo étnico al que pertenece el paciente. Clasificación usada por el CDC en el estudio NHANES."
+    )
+
+    st.markdown("#### ⚖️ Composición corporal")
+
+    weight_kg = st.number_input(
+        "Peso (kg)", 0.0, 260.0, 0.0, step=0.5,
+        help="Tu peso en kilogramos. Dejar en 0 si no lo sabes — el modelo usará el promedio poblacional."
+    )
+    height_cm = st.number_input(
+        "Altura (cm)", 0.0, 200.0, 0.0, step=0.5,
+        help="Tu altura en centímetros. Dejar en 0 si no lo sabes — el modelo usará el promedio poblacional."
+    )
+
     if weight_kg > 0 and height_cm > 0:
         bmi = round(weight_kg / ((height_cm / 100) ** 2), 1)
-        st.metric("BMI calculado", bmi)
+        estado_bmi = (
+            "Bajo peso" if bmi < 18.5 else
+            "Normal" if bmi < 25 else
+            "Sobrepeso" if bmi < 30 else
+            "Obesidad"
+        )
+        st.metric("BMI calculado", bmi, delta=estado_bmi,
+                  delta_color="off",
+                  help="Índice de Masa Corporal = peso / altura². Indicador de composición corporal.")
     else:
         bmi = None
-        st.caption("_BMI se calculará automáticamente cuando ingreses peso y altura_")
+        st.caption("_El BMI se calculará automáticamente cuando ingreses peso y altura._")
 
-    # Cintura opcional
-    tiene_cintura = st.checkbox("Conozco mi medida de cintura *(opcional)*")
+    tiene_cintura = st.checkbox(
+        "Conozco mi medida de cintura *(opcional)*",
+        help="La circunferencia de cintura es un indicador de grasa abdominal, asociada con mayor riesgo de trastornos del sueño como apnea."
+    )
     waist_cm = None
     if tiene_cintura:
-        waist_cm = st.number_input("Circunferencia cintura (cm)", 20.0, 200.0, 80.0, step=0.5)
+        waist_cm = st.number_input(
+            "Circunferencia de cintura (cm)", 20.0, 200.0, 80.0, step=0.5,
+            help="Medir con cinta métrica alrededor del ombligo, sin contraer el abdomen. Valor típico: 80–99 cm."
+        )
 
 with col2:
-    # Pulso opcional
-    tiene_pulso = st.checkbox("Conozco mi pulso en reposo *(opcional)*")
+    st.markdown("#### 💓 Salud cardiovascular")
+
+    tiene_pulso = st.checkbox(
+        "Conozco mi pulso en reposo *(opcional)*",
+        help="El pulso en reposo refleja qué tan eficiente es tu corazón. Un pulso alto puede indicar estrés o mala condición física, factores relacionados con trastornos del sueño."
+    )
     resting_pulse = None
     if tiene_pulso:
-        resting_pulse = st.slider("Pulso en reposo (bpm)", 34, 142, 70)
+        resting_pulse = st.slider(
+            "Pulso en reposo (bpm)", 34, 142, 70,
+            help="Latidos por minuto en reposo total, idealmente medido en la mañana antes de levantarse. Rango normal: 60–100 bpm. Atletas pueden tener 40–60 bpm."
+        )
 
-    sleep_weekday_hrs  = st.slider("Horas de sueño entre semana", 2.0, 14.0, 7.0, step=0.5)
-    sleep_weekend_hrs  = st.slider("Horas de sueño fin de semana", 2.0, 14.0, 8.0, step=0.5)
+    st.markdown("#### 😴 Hábitos de sueño")
+
+    sleep_weekday_hrs = st.slider(
+        "Horas de sueño entre semana", 2.0, 14.0, 7.0, step=0.5,
+        help="Promedio de horas que duermes de lunes a viernes. Los adultos necesitan entre 7 y 9 horas según la Academia Americana de Medicina del Sueño."
+    )
+    sleep_weekend_hrs = st.slider(
+        "Horas de sueño fin de semana", 2.0, 14.0, 8.0, step=0.5,
+        help="Promedio de horas que duermes sábado y domingo. Dormir mucho más que entre semana puede indicar 'deuda de sueño' acumulada."
+    )
     sleep_trouble_freq = st.selectbox(
-        "Frecuencia de problemas para dormir",
+        "¿Con qué frecuencia tienes problemas para dormir?",
         [0, 2, 3, 4, 5],
         format_func=lambda x: {
             0: "Nunca",
-            2: "Rara vez",
-            3: "A veces",
-            4: "Seguido",
-            5: "Casi siempre"
-        }[x]
+            2: "Rara vez (1–2 veces al mes)",
+            3: "A veces (1–2 veces por semana)",
+            4: "Seguido (3–4 veces por semana)",
+            5: "Casi siempre (5 o más veces por semana)"
+        }[x],
+        help="Incluye dificultad para conciliar el sueño, despertarse durante la noche o sentirse sin descanso al despertar."
     )
 
-    st.markdown("**Actividad física**")
-    vigorous_work = st.radio("¿Hace actividad vigorosa en trabajo?", [1, 2],
-                              format_func=lambda x: "Sí" if x == 1 else "No")
-    moderate_work = st.radio("¿Hace actividad moderada en trabajo?", [1, 2],
-                              format_func=lambda x: "Sí" if x == 1 else "No")
-    vigorous_rec  = st.radio("¿Hace actividad vigorosa recreativa?", [1, 2],
-                              format_func=lambda x: "Sí" if x == 1 else "No")
+    st.markdown("#### 🏃 Actividad física")
+    st.caption("Actividad **vigorosa**: causa aumento grande en respiración y ritmo cardíaco. Ejemplos: correr, fútbol, ciclismo intenso, natación rápida, aeróbicos intensos.")
+    st.caption("Actividad **moderada**: causa aumento leve en respiración y ritmo cardíaco. Ejemplos: caminar rápido, yoga, bailar, ciclismo suave, trabajo doméstico pesado.")
 
-    vigorous_work_min = st.number_input(
-        "Minutos/día actividad vigorosa laboral", 0, 840, 0,
-        disabled=(vigorous_work == 2)
+    vigorous_work = st.radio(
+        "¿Realiza actividad **vigorosa** en su trabajo o labores?", [1, 2],
+        format_func=lambda x: "✅ Sí" if x == 1 else "❌ No",
+        help="Incluye trabajos físicamente exigentes como construcción, carga de materiales pesados, agricultura intensa, etc."
     )
-    vigorous_rec_min = st.number_input(
-        "Minutos/día actividad vigorosa recreativa", 0, 480, 0,
-        disabled=(vigorous_rec == 2)
+    if vigorous_work == 1:
+        vigorous_work_min = st.number_input(
+            "¿Cuántos minutos por día?", 0, 840, 60,
+            help="Minutos promedio por día que realiza esta actividad vigorosa en el trabajo."
+        )
+    else:
+        vigorous_work_min = 0
+
+    moderate_work = st.radio(
+        "¿Realiza actividad **moderada** en su trabajo o labores?", [1, 2],
+        format_func=lambda x: "✅ Sí" if x == 1 else "❌ No",
+        help="Incluye trabajos como enfermería, docencia activa, ventas con caminata, limpieza, etc."
     )
+
+    vigorous_rec = st.radio(
+        "¿Realiza actividad **vigorosa** en tiempo libre o recreación?", [1, 2],
+        format_func=lambda x: "✅ Sí" if x == 1 else "❌ No",
+        help="Incluye deportes recreativos, gym de alta intensidad, HIIT, crossfit, running, ciclismo de montaña, etc."
+    )
+    if vigorous_rec == 1:
+        vigorous_rec_min = st.number_input(
+            "¿Cuántos minutos por día?", 0, 480, 30,
+            help="Minutos promedio por día que dedica a esta actividad recreativa vigorosa."
+        )
+    else:
+        vigorous_rec_min = 0
 
 st.divider()
 
@@ -111,7 +185,7 @@ campos_opcionales = {
     "Pulso":   tiene_pulso,
 }
 completados = sum(campos_opcionales.values())
-total = len(campos_opcionales)
+total       = len(campos_opcionales)
 
 st.markdown(f"**Datos opcionales completados: {completados}/{total}**")
 st.progress(completados / total)
@@ -124,7 +198,6 @@ else:
 # ── Predicción ───────────────────────────────────────────────────
 if st.button("🔍 Analizar riesgo", use_container_width=True, type="primary"):
 
-    # Imputar valores faltantes con medianas del dataset NHANES
     MEDIANAS = {
         "weight_kg":     82.3,
         "height_cm":     168.0,
@@ -133,17 +206,15 @@ if st.button("🔍 Analizar riesgo", use_container_width=True, type="primary"):
         "resting_pulse": 70.0,
     }
 
-    weight_final  = weight_kg  if weight_kg > 0  else MEDIANAS["weight_kg"]
-    height_final  = height_cm  if height_cm > 0  else MEDIANAS["height_cm"]
-    bmi_final     = bmi        if bmi is not None else MEDIANAS["bmi"]
-    waist_final   = waist_cm   if waist_cm is not None else MEDIANAS["waist_cm"]
-    pulse_final   = resting_pulse if resting_pulse is not None else MEDIANAS["resting_pulse"]
+    weight_final = weight_kg      if weight_kg > 0          else MEDIANAS["weight_kg"]
+    height_final = height_cm      if height_cm > 0          else MEDIANAS["height_cm"]
+    bmi_final    = bmi            if bmi is not None         else MEDIANAS["bmi"]
+    waist_final  = waist_cm       if waist_cm is not None    else MEDIANAS["waist_cm"]
+    pulse_final  = resting_pulse  if resting_pulse is not None else MEDIANAS["resting_pulse"]
 
-    # Encodear
     etnia_encoded  = encoder.transform([ethnicity])[0]
     gender_encoded = 0 if gender == "Male" else 1
 
-    # Armar input
     input_data = pd.DataFrame([{
         "age":                age,
         "gender":             gender_encoded,
@@ -154,9 +225,9 @@ if st.button("🔍 Analizar riesgo", use_container_width=True, type="primary"):
         "waist_cm":           waist_final,
         "vigorous_work":      vigorous_work,
         "moderate_work":      moderate_work,
-        "vigorous_work_min":  vigorous_work_min if vigorous_work == 1 else 0,
+        "vigorous_work_min":  vigorous_work_min,
         "vigorous_rec":       vigorous_rec,
-        "vigorous_rec_min":   vigorous_rec_min if vigorous_rec == 1 else 0,
+        "vigorous_rec_min":   vigorous_rec_min,
         "sleep_weekday_hrs":  sleep_weekday_hrs,
         "sleep_weekend_hrs":  sleep_weekend_hrs,
         "sleep_trouble_freq": sleep_trouble_freq,
@@ -167,8 +238,7 @@ if st.button("🔍 Analizar riesgo", use_container_width=True, type="primary"):
     prob         = model.predict_proba(input_scaled)[0][1]
     prediccion   = model.predict(input_scaled)[0]
 
-    # ── Ajuste de confianza según datos completados ───────────────
-    confianza = 60 + (completados / total) * 40  # entre 60% y 100%
+    confianza = 60 + (completados / total) * 40
 
     # ── Resultado ─────────────────────────────────────────────────
     st.markdown("### 📊 Resultado del análisis")
@@ -183,12 +253,11 @@ if st.button("🔍 Analizar riesgo", use_container_width=True, type="primary"):
         st.metric("Probabilidad de trastorno", f"{prob*100:.1f}%")
     with col_res3:
         st.metric("Confianza del modelo", f"{confianza:.0f}%",
-                  help="Aumenta con más datos opcionales completados")
+                  help="Aumenta al completar más campos opcionales.")
 
     if completados < total:
         st.warning(f"📌 Completaste {completados}/{total} campos opcionales. Entre más datos brindes, más preciso será el resultado.")
 
-    # Gauge
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=prob * 100,
@@ -211,7 +280,6 @@ if st.button("🔍 Analizar riesgo", use_container_width=True, type="primary"):
     fig.update_layout(height=300, margin=dict(t=40, b=0))
     st.plotly_chart(fig, use_container_width=True)
 
-    # ── Recomendaciones ───────────────────────────────────────────
     st.markdown("### 💡 Recomendaciones")
     if prob > 0.5:
         st.warning("""
