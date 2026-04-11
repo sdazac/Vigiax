@@ -14,10 +14,10 @@ st.set_page_config(
 # ── Cargar modelo y artefactos ───────────────────────────────────
 @st.cache_resource
 def cargar_modelo():
-    model    = joblib.load("vigiax_model.pkl")
-    scaler   = joblib.load("vigiax_scaler.pkl")
-    encoder  = joblib.load("vigiax_encoder.pkl")
-    features = joblib.load("vigiax_features.pkl")
+    model    = joblib.load("RF/vigiax_model.pkl")
+    scaler   = joblib.load("RF/vigiax_scaler.pkl")
+    encoder  = joblib.load("RF/vigiax_encoder.pkl")
+    features = joblib.load("RF/vigiax_features.pkl")
     return model, scaler, encoder, features
 
 model, scaler, encoder, features = cargar_modelo()
